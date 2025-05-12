@@ -1,20 +1,57 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, TouchableOpacity } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const GiaoDiennangcao = () => (
   <View style={styles.container}>
 
     <View style={styles.rowHeader}>
-      <View style={styles.logo}><Text style={styles.text}>Logo ở đây</Text></View>
-      <View style={styles.header}><Text style={styles.text}>Phần header ở đây</Text></View>
+      <View style={styles.logo}>
+        <ImageBackground
+          source={require('../img/xbox_logo.png')}
+          style={styles.header}
+          imageStyle={{ borderRadius: 0 }}
+          resizeMode="cover"
+          width="100%"
+          height="100%"
+          objectFit="container"
+        >
+        </ImageBackground>
+      </View>
+      <ImageBackground
+        source={require('../img/OIP.jpg')}
+        style={styles.header}
+        imageStyle={{ borderRadius: 0 }}
+      >
+      </ImageBackground>
     </View>
 
     <View style={styles.rowContent}>
       <View style={styles.sidebar}><Text style={styles.text}>Side bar ở đây</Text></View>
       <View style={styles.main}><Text style={styles.text}>Main content ở đây</Text></View>
     </View>
-    
-    <View style={styles.footer}><Text style={styles.text}>Footer ở đây</Text></View>
+
+    <View style={styles.footer}>
+      <View style={styles.footerContent}>
+        <TouchableOpacity>
+          <Text style={styles.footerText}>Chính sách bảo mật</Text>
+        </TouchableOpacity>
+        <View style={styles.socialIcons}>
+          <TouchableOpacity style={styles.iconButton}>
+            <Icon name="facebook" size={24} color="white" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconButton}>
+            <Icon name="twitter" size={24} color="white" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconButton}>
+            <Icon name="youtube" size={24} color="white" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconButton}>
+            <Icon name="instagram" size={24} color="white" />
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
   </View>
   
 );
@@ -35,21 +72,19 @@ const styles = StyleSheet.create({
   },
   logo: {
     flex: 1,
-    backgroundColor: '#FFD166',
     borderRightWidth: 3,
     borderColor: '#222',
-    justifyContent: 'center',
-    alignItems: 'center',
+    marginRight: 0,
+    padding: 0,
   },
   header: {
-    flex: 2,
-    backgroundColor: '#06D6A0',
+    flex: 2.5,
     justifyContent: 'center',
     alignItems: 'center',
   },
   rowContent: {
     flexDirection: 'row',
-    flex: 3,
+    flex: 6,
     borderBottomWidth: 3,
     borderColor: '#222',
   },
@@ -72,6 +107,25 @@ const styles = StyleSheet.create({
     backgroundColor: '#073B4C',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  footerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    paddingHorizontal: 20,
+  },
+  footerText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  socialIcons: {
+    flexDirection: 'row',
+    gap: 15,
+  },
+  iconButton: {
+    padding: 5,
   },
   text: {
     color: '#222',
