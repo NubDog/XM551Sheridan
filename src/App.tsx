@@ -6,7 +6,8 @@ import { SafeAreaView, StyleSheet } from 'react-native';
 // import HelloWord0 from './components/HelloWord0';
 // import Calculator from './components/Calculator';
 // import LayoutMacdinh from './components/LayoutMacdinh';
-import GiaoDiennangcao from './components/GiaoDiennangcao';
+// import GiaoDiennangcao from './components/GiaoDiennangcao';
+import Buoi8 from './components/Buoi8'
 
 export default function App() {
   // Khởi tạo state để lưu trữ thông tin người dùng
@@ -42,7 +43,8 @@ export default function App() {
       /> */}
       {/* <Calculator /> */}
       {/* <LayoutMacdinh /> */}
-      <GiaoDiennangcao />
+      {/* <GiaoDiennangcao /> */}
+      <Buoi8/>
     </SafeAreaView>
   );
 }
