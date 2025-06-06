@@ -24,6 +24,14 @@ export type Product = {
   quantity: number;
 };
 
+export type User = {
+  id: number;
+  email: string;
+  phone?: string;
+  password: string;
+  role: 'user' | 'admin';
+};
+
 const initialCategories: Category[] = [
   { id: 1, name: 'Áo' },
   { id: 2, name: 'Giày' },
@@ -38,6 +46,12 @@ const initialProducts: Product[] = [
     { id: 4, name: 'Mũ lưỡi trai', price: 120000, img: 'hinh1.jpg', categoryId: 4, quantity: 0 },
     { id: 5, name: 'Túi xách nữ', price: 980000, img: 'hinh1.jpg', categoryId: 5, quantity: 0 },
   ];
+
+const initialUsers: User[] = [
+  { id: 1, email: 'admin@example.com', phone: '0987654321', password: 'admin123', role: 'admin' },
+  { id: 2, email: 'user@example.com', phone: '0123456789', password: 'user123', role: 'user' },
+  { id: 3, email: 'admin', phone: '0909090909', password: '123', role: 'admin' },
+];
 
 //async: Khai báo đây là một hàm bất đồng bộ, cho phép sử dụng await bên trong
 // onSuccess?: () => void: Tham số truyền vào là một callback tùy chọn, gọi khi quá trình khởi tạo thành công.
@@ -67,6 +81,19 @@ export const initDatabase = async (onSuccess?: () => void): Promise<void> => {
         initialProducts.forEach((product) => {
           tx.executeSql('INSERT OR IGNORE INTO products (id, name, price, img, categoryId, quantity) VALUES (?, ?, ?, ?, ?, ?)',
             [product.id, product.name, product.price, product.img, product.categoryId, product.quantity]);
+        });
+
+        tx.executeSql(`CREATE TABLE IF NOT EXISTS users (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          email TEXT NOT NULL UNIQUE,
+          phone TEXT,
+          password TEXT NOT NULL,
+          role TEXT NOT NULL CHECK(role IN ('user', 'admin')) DEFAULT 'user'
+        )`);
+
+        initialUsers.forEach((user) => {
+          tx.executeSql('INSERT OR IGNORE INTO users (id, email, phone, password, role) VALUES (?, ?, ?, ?, ?)',
+            [user.id, user.email, user.phone, user.password, user.role]);
         });
       },
       (error) => console.error('❌ Transaction error:', error),
@@ -170,5 +197,134 @@ export const fetchProductsByCategory = async (categoryId: number): Promise<Produ
   } catch (error) {
     console.error('❌ Error fetching products by category:', error);
     return [];
+  }
+};
+
+// User authentication functions
+export const registerUser = async (user: Omit<User, 'id'>): Promise<boolean> => {
+  try {
+    const database = await getDb();
+    await database.executeSql(
+      'INSERT INTO users (email, phone, password, role) VALUES (?, ?, ?, ?)',
+      [user.email, user.phone || null, user.password, user.role]
+    );
+    console.log('✅ User registered successfully');
+    return true;
+  } catch (error) {
+    console.error('❌ Error registering user:', error);
+    return false;
+  }
+};
+
+export const loginUser = async (email: string, password: string): Promise<User | null> => {
+  try {
+    const database = await getDb();
+    const results = await database.executeSql(
+      'SELECT * FROM users WHERE email = ? AND password = ?',
+      [email, password]
+    );
+    
+    if (results[0].rows.length > 0) {
+      return results[0].rows.item(0) as User;
+    }
+    return null;
+  } catch (error) {
+    console.error('❌ Error during login:', error);
+    return null;
+  }
+};
+
+export const loginWithPhone = async (phone: string, password: string): Promise<User | null> => {
+  try {
+    const database = await getDb();
+    const results = await database.executeSql(
+      'SELECT * FROM users WHERE phone = ? AND password = ?',
+      [phone, password]
+    );
+    
+    if (results[0].rows.length > 0) {
+      return results[0].rows.item(0) as User;
+    }
+    return null;
+  } catch (error) {
+    console.error('❌ Error during phone login:', error);
+    return null;
+  }
+};
+
+export const fetchUsers = async (): Promise<User[]> => {
+  try {
+    const database = await getDb();
+    const results = await database.executeSql('SELECT * FROM users');
+    const items: User[] = [];
+    const rows = results[0].rows;
+    for (let i = 0; i < rows.length; i++) {
+      items.push(rows.item(i));
+    }
+    return items;
+  } catch (error) {
+    console.error('❌ Error fetching users:', error);
+    return [];
+  }
+};
+
+export const searchProducts = async (query: string): Promise<Product[]> => {
+  try {
+    const database = await getDb();
+    const searchTerm = `%${query}%`;
+    const results = await database.executeSql(
+      'SELECT * FROM products WHERE name LIKE ?',
+      [searchTerm]
+    );
+    
+    const products: Product[] = [];
+    const rows = results[0].rows;
+    for (let i = 0; i < rows.length; i++) {
+      products.push(rows.item(i));
+    }
+    
+    return products;
+  } catch (error) {
+    console.error('❌ Error searching products:', error);
+    return [];
+  }
+};
+
+export const addUser = async (user: Omit<User, 'id'>) => {
+  try {
+    const database = await getDb();
+    await database.executeSql(
+      'INSERT INTO users (email, phone, password, role) VALUES (?, ?, ?, ?)',
+      [user.email, user.phone || null, user.password, user.role]
+    );
+    console.log('✅ User added');
+  } catch (error) {
+    console.error('❌ Error adding user:', error);
+    throw error;
+  }
+};
+
+export const updateUser = async (user: User) => {
+  try {
+    const database = await getDb();
+    await database.executeSql(
+      'UPDATE users SET email = ?, phone = ?, password = ?, role = ? WHERE id = ?',
+      [user.email, user.phone || null, user.password, user.role, user.id]
+    );
+    console.log('✅ User updated');
+  } catch (error) {
+    console.error('❌ Error updating user:', error);
+    throw error;
+  }
+};
+
+export const deleteUser = async (id: number) => {
+  try {
+    const database = await getDb();
+    await database.executeSql('DELETE FROM users WHERE id = ?', [id]);
+    console.log('✅ User deleted');
+  } catch (error) {
+    console.error('❌ Error deleting user:', error);
+    throw error;
   }
 };
